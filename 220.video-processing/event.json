@@ -1,0 +1,11 @@
+{
+      "bucket": {
+        "input": "220.video-processing-0-input-ee6a22ec-c65d-4c",
+        "output": "220.video-processing-0-output-1fbc04bf-d09a-4c"
+      },
+      "object": {
+        "duration": 1,
+        "key": "city.mp4",
+        "op": "watermark"
+      }
+    }
