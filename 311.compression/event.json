@@ -1,0 +1,9 @@
+{
+      "bucket": {
+        "input": "311.compression-0-input-a0e4e0b4-79e4-44",
+        "output": "311.compression-0-output-4734cc0a-9d79-45"
+      },
+      "object": {
+        "key": "acmart-master"
+      }
+    }
