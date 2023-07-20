@@ -4,9 +4,9 @@ import os
 import shutil
 import uuid
 import zlib
+import boto3
 
-from . import storage
-client = storage.storage.get_instance()
+client = boto3.client('s3')
 
 def parse_directory(directory):
 
@@ -15,8 +15,25 @@ def parse_directory(directory):
         for file in files:
             size += os.path.getsize(os.path.join(root, file))
     return size
-
-def handler(event):
+def unique_name(name):
+        name, extension = os.path.splitext(name)
+        return '{name}.{random}.{extension}'.format(
+                    name=name,
+                    extension=extension,
+                    random=str(uuid.uuid4()).split('-')[0]
+                )
+def download_directory(client, bucket, prefix, path):
+    objects = client.list_objects_v2(Bucket=bucket, Prefix=prefix)
+    for obj in objects['Contents']:
+        file_name = obj['Key']
+        path_to_file = os.path.dirname(file_name)
+        os.makedirs(os.path.join(path, path_to_file), exist_ok=True)
+        client.download_file(bucket, file_name, os.path.join(path, file_name))
+def upload(client, bucket, file, filepath):
+    key_name = unique_name(file)
+    client.upload_file(filepath, bucket, key_name)
+    return key_name
+def handler(event,context):
   
     input_bucket = event.get('bucket').get('input')
     output_bucket = event.get('bucket').get('output')
@@ -25,7 +42,8 @@ def handler(event):
     os.makedirs(download_path)
 
     s3_download_begin = datetime.datetime.now()
-    client.download_directory(input_bucket, key, download_path)
+    
+    download_directory(client, input_bucket, key, download_path)
     s3_download_stop = datetime.datetime.now()
     size = parse_directory(download_path)
 
@@ -36,7 +54,7 @@ def handler(event):
     s3_upload_begin = datetime.datetime.now()
     archive_name = '{}.zip'.format(key)
     archive_size = os.path.getsize(os.path.join(download_path, archive_name))
-    key_name = client.upload(output_bucket, archive_name, os.path.join(download_path, archive_name))
+    key_name = upload(client, output_bucket, archive_name, os.path.join(download_path, archive_name))
     s3_upload_stop = datetime.datetime.now()
 
     download_time = (s3_download_stop - s3_download_begin) / datetime.timedelta(microseconds=1)
