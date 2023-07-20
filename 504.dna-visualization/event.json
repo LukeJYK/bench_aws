@@ -1,0 +1,9 @@
+{
+      "bucket": {
+        "input": "504.dna-visualisation-0-input-45dbb052-6ea1-41",
+        "output": "504.dna-visualisation-0-output-41da392d-b208-4b"
+      },
+      "object": {
+        "key": "bacillus_subtilis.fasta"
+      }
+    }
