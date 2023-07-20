@@ -1,11 +1,21 @@
 import datetime, io, json
-# using https://squiggle.readthedocs.io/en/latest/
+import os
 from squiggle import transform
-
-from . import storage
-client = storage.storage.get_instance()
-
-def handler(event):
+import boto3
+import uuid
+client = boto3.client('s3')
+def unique_name(name):
+    name, extension = os.path.splitext(name)
+    return '{name}.{random}.{extension}'.format(
+        name=name,
+        extension=extension,
+        random=str(uuid.uuid4()).split('-')[0]
+    )
+def upload_stream(client, bucket, file, data):
+    key_name = unique_name(file)
+    client.upload_fileobj(data, bucket, key_name)
+    return key_name
+def handler(event, context):
 
     input_bucket = event.get('bucket').get('input')
     output_bucket = event.get('bucket').get('output')
@@ -13,7 +23,7 @@ def handler(event):
     download_path = '/tmp/{}'.format(key)
 
     download_begin = datetime.datetime.now()
-    client.download(input_bucket, key, download_path)
+    client.download_file(input_bucket, key, download_path)
     download_stop = datetime.datetime.now()
     data = open(download_path, "r").read()
 
@@ -24,7 +34,8 @@ def handler(event):
     upload_begin = datetime.datetime.now()
     buf = io.BytesIO(json.dumps(result).encode())
     buf.seek(0)
-    key_name = client.upload_stream(output_bucket, key, buf)
+
+    key_name = upload_stream(client, output_bucket, key, buf)
     upload_stop = datetime.datetime.now()
     buf.close()
 
