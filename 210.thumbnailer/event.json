@@ -1,0 +1,11 @@
+{
+      "bucket": {
+        "input": "210.thumbnailer-0-input-3631ffb0-de47-49",
+        "output": "210.thumbnailer-0-output-d60c0c18-6ccd-4c"
+      },
+      "object": {
+        "height": 200,
+        "key": "3_aerial-shot-architecture-bridge-2887493.jpg",
+        "width": 200
+      }
+}

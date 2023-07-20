@@ -5,8 +5,8 @@ import sys
 import uuid
 from urllib.parse import unquote_plus
 from PIL import Image
-
-client = 
+import boto3
+client = boto3.client('s3')
 
 # Disk-based solution
 #def resize_image(image_path, resized_path, w, h):
@@ -23,8 +23,14 @@ def resize_image(image_bytes, w, h):
         # necessary to rewind to the beginning of the buffer
         out.seek(0)
         return out
-
-def handler(event):
+def unique_name(name):
+    name, extension = os.path.splitext(name)
+    return '{name}.{random}.{extension}'.format(
+                    name=name,
+                    extension=extension,
+                    random=str(uuid.uuid4()).split('-')[0]
+                )
+def handler(event,context):
   
     input_bucket = event.get('bucket').get('input')
     output_bucket = event.get('bucket').get('output')
@@ -38,16 +44,17 @@ def handler(event):
     #resize_image(download_path, upload_path, width, height)
     #client.upload(output_bucket, key, upload_path)
     download_begin = datetime.datetime.now()
-    img = client.download_stream(input_bucket, key)
+    data = io.BytesIO()
+    client.download_fileobj(input_bucket, key, data)
+    img = data.getbuffer()
     download_end = datetime.datetime.now()
-
     process_begin = datetime.datetime.now()
     resized = resize_image(img, width, height)
     resized_size = resized.getbuffer().nbytes
     process_end = datetime.datetime.now()
-
     upload_begin = datetime.datetime.now()
-    key_name = client.upload_stream(output_bucket, key, resized)
+    key_name = unique_name(key)
+    client.upload_fileobj(resized, output_bucket, key_name)
     upload_end = datetime.datetime.now()
 
     download_time = (download_end - download_begin) / datetime.timedelta(microseconds=1)
