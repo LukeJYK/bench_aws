@@ -4,10 +4,9 @@ import datetime
 import os
 import stat
 import subprocess
+import boto3
 
-
-from . import storage
-client = storage.storage.get_instance()
+client = boto3.client('s3')
 
 SCRIPT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
@@ -51,7 +50,14 @@ def transcode_mp3(video, duration, event):
 
 operations = { 'transcode' : transcode_mp3, 'extract-gif' : to_gif, 'watermark' : watermark }
 
-def handler(event):
+def unique_name(name):
+    name, extension = os.path.splitext(name)
+    return '{name}.{random}.{extension}'.format(
+                    name=name,
+                    extension=extension,
+                    random=str(uuid.uuid4()).split('-')[0]
+                )
+def handler(event,context):
     input_bucket = event.get('bucket').get('input')
     output_bucket = event.get('bucket').get('output')
     key = event.get('object').get('key')
@@ -69,7 +75,7 @@ def handler(event):
         pass
 
     download_begin = datetime.datetime.now()
-    client.download(input_bucket, key, download_path)
+    client.download_file(input_bucket, key, download_path)
     download_size = os.path.getsize(download_path)
     download_stop = datetime.datetime.now()
 
@@ -80,7 +86,8 @@ def handler(event):
     upload_begin = datetime.datetime.now()
     filename = os.path.basename(upload_path)
     upload_size = os.path.getsize(upload_path)
-    client.upload(output_bucket, filename, upload_path)
+    key_name = unique_name(filename)
+    client.upload_file(upload_path, output_bucket, key_name)
     upload_stop = datetime.datetime.now()
 
     download_time = (download_stop - download_begin) / datetime.timedelta(microseconds=1)
