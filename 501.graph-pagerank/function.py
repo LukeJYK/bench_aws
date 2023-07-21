@@ -1,7 +1,7 @@
 import datetime
 import igraph
 
-def handler(event):
+def handler(event, context):
 
     size = event.get('size')
 
