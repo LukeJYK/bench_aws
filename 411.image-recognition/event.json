@@ -1,0 +1,10 @@
+    {
+      "bucket": {
+        "input": "411.image-recognition-1-input-3f8e4039-5e15-48",
+        "model": "411.image-recognition-0-input-7e9c357b-ceb7-45"
+      },
+      "object": {
+        "input": "800px-Porsche_991_silver_IAA.jpg",
+        "model": "resnet50-19c8e357.pth"
+      }
+    }
