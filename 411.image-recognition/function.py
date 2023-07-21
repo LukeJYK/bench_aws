@@ -1,29 +1,23 @@
-
 import datetime, json, os, uuid
 
 # Extract zipped torch model - used in Python 3.8 and 3.9
 # The reason is that torch versions supported for these Python
 # versions are too large for Lambda packages.
-if os.path.exists('function/torch.zip'):
-    import zipfile, sys
-    # we cannot write to the read-only filesystem
-    zipfile.ZipFile('function/torch.zip').extractall('/tmp/')
-    sys.path.append(os.path.join(os.path.dirname(__file__), '/tmp/.python_packages/lib/site-packages'))
 
 from PIL import Image
 import torch
 from torchvision import transforms
 from torchvision.models import resnet50
 
-from . import storage
-client = storage.storage.get_instance()
+import boto3
+client = boto3.client('s3')
 
 SCRIPT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 class_idx = json.load(open(os.path.join(SCRIPT_DIR, "imagenet_class_index.json"), 'r'))
 idx2label = [class_idx[str(k)][1] for k in range(len(class_idx))]
 model = None
 
-def handler(event):
+def handler(event, context):
   
     model_bucket = event.get('bucket').get('model')
     input_bucket = event.get('bucket').get('input')
@@ -33,14 +27,14 @@ def handler(event):
 
     image_download_begin = datetime.datetime.now()
     image_path = download_path
-    client.download(input_bucket, key, download_path)
+    client.download_file(input_bucket, key, download_path)
     image_download_end = datetime.datetime.now()
 
     global model
     if not model:
         model_download_begin = datetime.datetime.now()
         model_path = os.path.join('/tmp', model_key)
-        client.download(model_bucket, model_key, model_path)
+        client.download_file(model_bucket, model_key, model_path)
         model_download_end = datetime.datetime.now()
         model_process_begin = datetime.datetime.now()
         model = resnet50(pretrained=False)
@@ -84,3 +78,4 @@ def handler(event):
                 'model_download_time': model_download_time
             }
         }
+
