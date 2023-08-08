@@ -3,6 +3,7 @@ import io
 import os
 import sys
 import uuid
+import time
 from urllib.parse import unquote_plus
 from PIL import Image
 import boto3
@@ -31,7 +32,7 @@ def unique_name(name):
                     random=str(uuid.uuid4()).split('-')[0]
                 )
 def handler(event,context):
-  
+    start = time.time() 
     input_bucket = event.get('bucket').get('input')
     output_bucket = event.get('bucket').get('output')
     key = unquote_plus(event.get('object').get('key'))
@@ -60,6 +61,7 @@ def handler(event,context):
     download_time = (download_end - download_begin) / datetime.timedelta(microseconds=1)
     upload_time = (upload_end - upload_begin) / datetime.timedelta(microseconds=1)
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
+    exe = time.time() - start
     return {
             'result': {
                 'bucket': output_bucket,
@@ -70,6 +72,7 @@ def handler(event,context):
                 'download_size': len(img),
                 'upload_time': upload_time,
                 'upload_size': resized_size,
-                'compute_time': process_time
+                'compute_time': process_time,
+                'execution_time': exe
             }
     }
