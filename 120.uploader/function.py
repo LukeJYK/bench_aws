@@ -4,7 +4,7 @@ import os
 import uuid
 import boto3
 import urllib.request
-
+import time
 client = boto3.client('s3')
 
 def unique_name(name):
@@ -15,7 +15,7 @@ def unique_name(name):
                     random=str(uuid.uuid4()).split('-')[0]
                 )
 def handler(event, context):
-  
+    start = time.time()
     output_bucket = event.get('bucket').get('output')
     url = event.get('object').get('url')
     name = os.path.basename(url)
@@ -33,6 +33,7 @@ def handler(event, context):
 
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
     upload_time = (upload_end - upload_begin) / datetime.timedelta(microseconds=1)
+    exe = time.time() - start
     return {
             'result': {
                 'bucket': output_bucket,
@@ -44,6 +45,7 @@ def handler(event, context):
                 'download_size': 0,
                 'upload_time': upload_time,
                 'upload_size': size,
-                'compute_time': process_time
+                'compute_time': process_time,
+                'execution_time': exe
             }
     }
