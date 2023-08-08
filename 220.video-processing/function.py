@@ -5,7 +5,7 @@ import os
 import stat
 import subprocess
 import boto3
-
+import time
 client = boto3.client('s3')
 
 SCRIPT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -58,6 +58,7 @@ def unique_name(name):
                     random=str(uuid.uuid4()).split('-')[0]
                 )
 def handler(event,context):
+    start = time.time()
     input_bucket = event.get('bucket').get('input')
     output_bucket = event.get('bucket').get('output')
     key = event.get('object').get('key')
@@ -93,6 +94,7 @@ def handler(event,context):
     download_time = (download_stop - download_begin) / datetime.timedelta(microseconds=1)
     upload_time = (upload_stop - upload_begin) / datetime.timedelta(microseconds=1)
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
+    exe = time.time() - start
     return {
             'result': {
                 'bucket': output_bucket,
@@ -103,7 +105,8 @@ def handler(event,context):
                 'download_size': download_size,
                 'upload_time': upload_time,
                 'upload_size': upload_size,
-                'compute_time': process_time
+                'compute_time': process_time,
+                'exe_time': exe
             }
         }
 
