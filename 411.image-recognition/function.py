@@ -8,7 +8,7 @@ from PIL import Image
 import torch
 from torchvision import transforms
 from torchvision.models import resnet50
-
+import time
 import boto3
 client = boto3.client('s3')
 
@@ -18,7 +18,7 @@ idx2label = [class_idx[str(k)][1] for k in range(len(class_idx))]
 model = None
 
 def handler(event, context):
-  
+    start = time.time()
     model_bucket = event.get('bucket').get('model')
     input_bucket = event.get('bucket').get('input')
     key = event.get('object').get('input')
@@ -69,13 +69,15 @@ def handler(event, context):
     model_download_time = (model_download_end - model_download_begin) / datetime.timedelta(microseconds=1)
     model_process_time = (model_process_end - model_process_begin) / datetime.timedelta(microseconds=1)
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
+    execution_time = time.time() - start
     return {
             'result': {'idx': index.item(), 'class': ret},
             'measurement': {
                 'download_time': download_time + model_download_time,
                 'compute_time': process_time + model_process_time,
                 'model_time': model_process_time,
-                'model_download_time': model_download_time
+                'model_download_time': model_download_time,
+                'execution_time': execution_time
             }
         }
 
