@@ -6,6 +6,7 @@ import stat
 import subprocess
 import boto3
 import time
+import uuid
 client = boto3.client('s3')
 
 SCRIPT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__)))
