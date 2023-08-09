@@ -3,6 +3,7 @@ import os
 from squiggle import transform
 import boto3
 import uuid
+import time
 client = boto3.client('s3')
 def unique_name(name):
     name, extension = os.path.splitext(name)
@@ -16,7 +17,7 @@ def upload_stream(client, bucket, file, data):
     client.upload_fileobj(data, bucket, key_name)
     return key_name
 def handler(event, context):
-
+    start = time.time()
     input_bucket = event.get('bucket').get('input')
     output_bucket = event.get('bucket').get('output')
     key = event.get('object').get('key')
@@ -41,7 +42,7 @@ def handler(event, context):
 
     download_time = (download_stop - download_begin) / datetime.timedelta(microseconds=1)
     process_time = (process_end - process_begin) / datetime.timedelta(microseconds=1)
-
+    exe = time.time() - start
     return {
             'result': {
                 'bucket': output_bucket,
@@ -49,6 +50,7 @@ def handler(event, context):
             },
             'measurement': {
                 'download_time': download_time,
-                'compute_time': process_time
-            }
+                'compute_time': process_time,
+                'execution_time': exe
+                }
     }
