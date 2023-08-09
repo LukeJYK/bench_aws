@@ -3,5 +3,5 @@ SeBS benchmark. All the testing code is written in Python, make sure you have al
 
 This original repo is: https://github.com/spcl/serverless-benchmarks
 
-TODO: Upload the bash scripts for testing the cold start time and the execution time for Lambda instance.
+This is used for MUG'23 Poster sesion, and the graph can be found in the ./plot.
 
