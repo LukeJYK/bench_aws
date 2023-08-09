@@ -5,6 +5,7 @@ import shutil
 import uuid
 import zlib
 import boto3
+import time
 
 client = boto3.client('s3')
 
@@ -34,7 +35,7 @@ def upload(client, bucket, file, filepath):
     client.upload_file(filepath, bucket, key_name)
     return key_name
 def handler(event,context):
-  
+    start = time.time()
     input_bucket = event.get('bucket').get('input')
     output_bucket = event.get('bucket').get('output')
     key = event.get('object').get('key')
@@ -60,6 +61,7 @@ def handler(event,context):
     download_time = (s3_download_stop - s3_download_begin) / datetime.timedelta(microseconds=1)
     upload_time = (s3_upload_stop - s3_upload_begin) / datetime.timedelta(microseconds=1)
     process_time = (compress_end - compress_begin) / datetime.timedelta(microseconds=1)
+    execution_time = time.time() - start
     return {
             'result': {
                 'bucket': output_bucket,
@@ -70,6 +72,7 @@ def handler(event,context):
                 'download_size': size,
                 'upload_time': upload_time,
                 'upload_size': archive_size,
-                'compute_time': process_time
+                'compute_time': process_time,
+                'execution_time': execution_time
             }
         }
