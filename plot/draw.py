@@ -90,14 +90,7 @@ def draw_input():
     0.002484083176,
     0.08141732216,
     0.2441539764,
-    0.6431322098,
-    1.107880831,
-    1.59154129,
-    1.708641291,
-    1.833094358,
-    1.976682186,
-    2.163918257
-    ]
+    0.6431322098,1.107880831,1.59154129,1.708641291,1.833094358,1.976682186,2.163918257]
 
     times_502 = np.array(input_size_502)
     node_502 = np.array(execution_time_502)
@@ -136,17 +129,43 @@ def draw_input():
     plt.scatter(input_size_501, execution_time_501, color = 'b')
     plt.scatter(input_size_502, execution_time_502, color = 'black')
     plt.scatter(input_size_503, execution_time_503, color = 'purple')
-    plt.xlabel("Input Size")
+    plt.xlabel("Generated Size")
     plt.ylabel("Execution Time (/s)")
     plt.legend(loc="upper left")
     plt.show()
-
+             
 def draw_varability():
+
+
+    # Data
+    data = [2.723516703, 2.614780188, 2.614917755, 2.626345873, 2.61181426, 
+            2.624297857, 2.270168543, 2.558188915, 2.612315416, 2.599187136]
+
+    # Calculate variance and standard deviation
+    variance = np.var(data)
+    std_dev = np.std(data)
+    mean = np.mean(data)
+    seasons = ['1','2','3','4','5','6','7','8','9','10']
+    # A plot for Aguero
+    plt.plot(seasons, data, marker='o', color='#003366', label='case1')
+    plt.axhline(y=mean, color='#6684a3', linestyle='--')
     
+    # label for x-axis, y-axis
+    plt.xlabel('Test#')
+    plt.ylabel('Execution Time(/s)')
+    # title of a plot
+    plt.title('variability')
+    # explanation(symbol) for a graph
+    plt.legend()
+    # This will pop up the graph
     plt.show()
 
 
 
 
+
+
+
+draw_varability()
 draw_coldstart()
 draw_input()
